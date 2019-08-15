@@ -1,12 +1,9 @@
 package org.apache.dubbo.remoting.transport.grpc;
 
 import static io.grpc.MethodDescriptor.generateFullMethodName;
-import static io.grpc.stub.ClientCalls.blockingUnaryCall;
-import static io.grpc.stub.ClientCalls.futureUnaryCall;
-import static io.grpc.stub.ServerCalls.asyncUnaryCall;
-import static io.grpc.stub.ServerCalls.asyncUnimplementedUnaryCall;
-
-import io.grpc.stub.ClientCalls;
+import static io.grpc.stub.ClientCalls.asyncBidiStreamingCall;
+import static io.grpc.stub.ServerCalls.asyncBidiStreamingCall;
+import static io.grpc.stub.ServerCalls.asyncUnimplementedStreamingCall;
 
 /**
  * <pre>
@@ -30,7 +27,7 @@ public final class GreeterGrpc {
       fullMethodName = SERVICE_NAME + '/' + "getRp",
       requestType = org.apache.dubbo.remoting.transport.grpc.proto.GrpcRequest.class,
       responseType = org.apache.dubbo.remoting.transport.grpc.proto.GrpcReply.class,
-      methodType = io.grpc.MethodDescriptor.MethodType.UNARY)
+      methodType = io.grpc.MethodDescriptor.MethodType.BIDI_STREAMING)
   public static io.grpc.MethodDescriptor<org.apache.dubbo.remoting.transport.grpc.proto.GrpcRequest,
       org.apache.dubbo.remoting.transport.grpc.proto.GrpcReply> getGetRpMethod() {
     io.grpc.MethodDescriptor<org.apache.dubbo.remoting.transport.grpc.proto.GrpcRequest, org.apache.dubbo.remoting.transport.grpc.proto.GrpcReply> getGetRpMethod;
@@ -39,7 +36,7 @@ public final class GreeterGrpc {
         if ((getGetRpMethod = GreeterGrpc.getGetRpMethod) == null) {
           GreeterGrpc.getGetRpMethod = getGetRpMethod =
               io.grpc.MethodDescriptor.<org.apache.dubbo.remoting.transport.grpc.proto.GrpcRequest, org.apache.dubbo.remoting.transport.grpc.proto.GrpcReply>newBuilder()
-              .setType(io.grpc.MethodDescriptor.MethodType.UNARY)
+              .setType(io.grpc.MethodDescriptor.MethodType.BIDI_STREAMING)
               .setFullMethodName(generateFullMethodName(
                   "proto.Greeter", "getRp"))
               .setSampledToLocalTracing(true)
@@ -90,16 +87,16 @@ public final class GreeterGrpc {
      * Sends a greeting
      * </pre>
      */
-    public void getRp(org.apache.dubbo.remoting.transport.grpc.proto.GrpcRequest request,
+    public io.grpc.stub.StreamObserver<org.apache.dubbo.remoting.transport.grpc.proto.GrpcRequest> getRp(
         io.grpc.stub.StreamObserver<org.apache.dubbo.remoting.transport.grpc.proto.GrpcReply> responseObserver) {
-      asyncUnimplementedUnaryCall(getGetRpMethod(), responseObserver);
+      return asyncUnimplementedStreamingCall(getGetRpMethod(), responseObserver);
     }
 
     @Override public final io.grpc.ServerServiceDefinition bindService() {
       return io.grpc.ServerServiceDefinition.builder(getServiceDescriptor())
           .addMethod(
             getGetRpMethod(),
-            asyncUnaryCall(
+            asyncBidiStreamingCall(
               new MethodHandlers<
                 org.apache.dubbo.remoting.transport.grpc.proto.GrpcRequest,
                 org.apache.dubbo.remoting.transport.grpc.proto.GrpcReply>(
@@ -134,10 +131,10 @@ public final class GreeterGrpc {
      * Sends a greeting
      * </pre>
      */
-    public void getRp(org.apache.dubbo.remoting.transport.grpc.proto.GrpcRequest request,
+    public io.grpc.stub.StreamObserver<org.apache.dubbo.remoting.transport.grpc.proto.GrpcRequest> getRp(
         io.grpc.stub.StreamObserver<org.apache.dubbo.remoting.transport.grpc.proto.GrpcReply> responseObserver) {
-      ClientCalls.asyncUnaryCall(
-          getChannel().newCall(getGetRpMethod(), getCallOptions()), request, responseObserver);
+      return asyncBidiStreamingCall(
+          getChannel().newCall(getGetRpMethod(), getCallOptions()), responseObserver);
     }
   }
 
@@ -161,16 +158,6 @@ public final class GreeterGrpc {
         io.grpc.CallOptions callOptions) {
       return new GreeterBlockingStub(channel, callOptions);
     }
-
-    /**
-     * <pre>
-     * Sends a greeting
-     * </pre>
-     */
-    public org.apache.dubbo.remoting.transport.grpc.proto.GrpcReply getRp(org.apache.dubbo.remoting.transport.grpc.proto.GrpcRequest request) {
-      return blockingUnaryCall(
-          getChannel(), getGetRpMethod(), getCallOptions(), request);
-    }
   }
 
   /**
@@ -193,17 +180,6 @@ public final class GreeterGrpc {
         io.grpc.CallOptions callOptions) {
       return new GreeterFutureStub(channel, callOptions);
     }
-
-    /**
-     * <pre>
-     * Sends a greeting
-     * </pre>
-     */
-    public com.google.common.util.concurrent.ListenableFuture<org.apache.dubbo.remoting.transport.grpc.proto.GrpcReply> getRp(
-        org.apache.dubbo.remoting.transport.grpc.proto.GrpcRequest request) {
-      return futureUnaryCall(
-          getChannel().newCall(getGetRpMethod(), getCallOptions()), request);
-    }
   }
 
   private static final int METHODID_GET_RP = 0;
@@ -225,10 +201,6 @@ public final class GreeterGrpc {
     @SuppressWarnings("unchecked")
     public void invoke(Req request, io.grpc.stub.StreamObserver<Resp> responseObserver) {
       switch (methodId) {
-        case METHODID_GET_RP:
-          serviceImpl.getRp((org.apache.dubbo.remoting.transport.grpc.proto.GrpcRequest) request,
-              (io.grpc.stub.StreamObserver<org.apache.dubbo.remoting.transport.grpc.proto.GrpcReply>) responseObserver);
-          break;
         default:
           throw new AssertionError();
       }
@@ -239,6 +211,9 @@ public final class GreeterGrpc {
     public io.grpc.stub.StreamObserver<Req> invoke(
         io.grpc.stub.StreamObserver<Resp> responseObserver) {
       switch (methodId) {
+        case METHODID_GET_RP:
+          return (io.grpc.stub.StreamObserver<Req>) serviceImpl.getRp(
+              (io.grpc.stub.StreamObserver<org.apache.dubbo.remoting.transport.grpc.proto.GrpcReply>) responseObserver);
         default:
           throw new AssertionError();
       }

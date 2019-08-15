@@ -5,8 +5,12 @@
 */
 package org.apache.dubbo.remoting.transport.grpc;
 
+import io.grpc.ManagedChannel;
+import io.grpc.ManagedChannelBuilder;
+import java.net.InetSocketAddress;
 import java.util.concurrent.TimeUnit;
 import org.apache.dubbo.common.URL;
+import org.apache.dubbo.common.utils.NetUtils;
 import org.apache.dubbo.remoting.Channel;
 import org.apache.dubbo.remoting.ChannelHandler;
 import org.apache.dubbo.remoting.RemotingException;
@@ -21,6 +25,10 @@ import org.apache.dubbo.remoting.transport.AbstractClient;
  */
 public class GrpcClient extends AbstractClient {
 
+  private volatile GreeterGrpc.GreeterStub greeterStub;
+
+  private volatile ManagedChannel managedChannel;
+
   public GrpcClient(URL url, ChannelHandler handler)
       throws RemotingException {
     super(url, handler);
@@ -28,27 +36,34 @@ public class GrpcClient extends AbstractClient {
 
   @Override
   protected void doOpen() throws Throwable {
-    //TODO
+    managedChannel = ManagedChannelBuilder.forAddress(getUrl().getHost(),
+        getUrl().getPort()).usePlaintext().build();
   }
 
 
   @Override
   protected void doConnect() throws Throwable {
-    //TODO
+    greeterStub = GreeterGrpc.newStub(managedChannel);
   }
 
   @Override
   protected void doDisConnect() throws Throwable {
-    //TODO
+    managedChannel.shutdown();
   }
 
   @Override
   protected void doClose() throws Throwable {
-    //TODO
+    managedChannel.shutdownNow();
   }
 
   @Override
   protected Channel getChannel() {
-    return null;
+    GreeterGrpc.GreeterStub c = greeterStub;
+    if (c == null) {
+      return null;
+    }
+    Channel channel = GrpcClientChannel.getOrAddChannel(c, getUrl(), this);
+    ((GrpcClientChannel) channel).setRemoteAddress(new InetSocketAddress(NetUtils.filterLocalHost(getUrl().getHost()), getUrl().getPort()));
+    return channel;
   }
 }
