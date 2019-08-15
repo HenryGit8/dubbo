@@ -10,6 +10,7 @@ import io.grpc.ManagedChannel;
 import io.grpc.stub.StreamObserver;
 import java.net.InetSocketAddress;
 import java.util.Map;
+import java.util.Random;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 import org.apache.dubbo.common.URL;
@@ -94,13 +95,16 @@ public class GrpcClientChannel extends AbstractChannel {
 
   @Override
   public void send(Object message, boolean sent) throws RemotingException {
+    System.out.println("客户端发送消息："+ message);
     super.send(message, sent);
     boolean success = true;
     int timeout = 0;
     try {
       JSONObject jsonObject = new JSONObject();
       jsonObject.put("msg", message);
-      jsonObject.put("addr", getLocalAddress());
+      jsonObject.put("msgType", message.getClass().getName());
+      jsonObject.put("addr", getUrl().getHost());
+      jsonObject.put("port", new Random().nextInt(9999 - 3000 + 1) + 3000);
       String str = jsonObject.toJSONString();
       responseObserver = new StreamObserver<GrpcReply>() {
         @Override
@@ -108,10 +112,13 @@ public class GrpcClientChannel extends AbstractChannel {
           String str = result.getData();
           JSONObject jsonObject = JSONObject.parseObject(str);
           Object msg = jsonObject.get("msg");
+          System.out.println("客户端接收到消息："+ msg);
+
           //InetSocketAddress inetSocketAddress = jsonObject.getObject("addr", InetSocketAddress.class);
           try {
-            GrpcClientChannel channel = GrpcClientChannel.getOrAddChannel(greeterStub, getUrl(), getChannelHandler());
-            getChannelHandler().received(channel, msg);
+            ChannelHandler channelHandler = getChannelHandler();
+            GrpcClientChannel channel = GrpcClientChannel.getOrAddChannel(greeterStub, getUrl(), channelHandler);
+            channelHandler.received(channel, msg);
           } catch (RemotingException e){
             e.printStackTrace();
           }
@@ -128,6 +135,8 @@ public class GrpcClientChannel extends AbstractChannel {
       };
       StreamObserver<GrpcRequest> streamObserver = greeterStub.getRp(responseObserver);
       GrpcRequest grpcRequest = GrpcRequest.newBuilder().setData(str).build();
+      System.out.println(str);
+      System.out.println("客户端发送请求："+ grpcRequest);
       streamObserver.onNext(grpcRequest);
     } catch (Throwable e) {
       throw new RemotingException(this, "Failed to send message " + message + " to " + getRemoteAddress() + ", cause: " + e.getMessage(), e);
@@ -174,6 +183,12 @@ public class GrpcClientChannel extends AbstractChannel {
     int result = 1;
     result = prime * result + ((greeterStub == null) ? 0 : greeterStub.hashCode());
     return result;
+  }
+
+  static void removeChannelIfDisconnected(GreeterGrpc.GreeterStub connection) {
+    if (connection != null) {
+      CHANNEL_MAP.remove(connection);
+    }
   }
 
   @Override

@@ -62,7 +62,7 @@ public class CuratorZookeeperClient extends AbstractZookeeperClient<CuratorZooke
     public CuratorZookeeperClient(URL url) {
         super(url);
         try {
-            int timeout = url.getParameter(TIMEOUT_KEY, 5000);
+            int timeout = url.getParameter(TIMEOUT_KEY, 50000);
             CuratorFrameworkFactory.Builder builder = CuratorFrameworkFactory.builder()
                     .connectString(url.getBackupAddress())
                     .retryPolicy(new RetryNTimes(1, 1000))

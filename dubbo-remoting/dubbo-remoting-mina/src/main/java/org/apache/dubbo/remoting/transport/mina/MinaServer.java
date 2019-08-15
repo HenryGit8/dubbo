@@ -93,6 +93,7 @@ public class MinaServer extends AbstractServer {
         return channels;
     }
 
+
     @Override
     public Channel getChannel(InetSocketAddress remoteAddress) {
         Set<IoSession> sessions = acceptor.getManagedSessions(getBindAddress());

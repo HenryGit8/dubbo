@@ -91,15 +91,18 @@ public class GrpcServerChannel extends AbstractChannel {
 
   @Override
   public void send(Object message, boolean sent) throws RemotingException {
+    System.out.println("发送消息："+ message);
     super.send(message, sent);
     boolean success = true;
     int timeout = 0;
     try {
       JSONObject jsonObject = new JSONObject();
       jsonObject.put("msg", message);
-      jsonObject.put("addr", getLocalAddress());
+      jsonObject.put("addr", getUrl().getHost());
+      jsonObject.put("port", getUrl().getPort());
       String str = jsonObject.toJSONString();
       Builder response = GrpcReply.newBuilder().setData(str);
+      System.out.println("json："+ str);
       grpcReplyStreamObserver.onNext(response.build());
     } catch (Throwable e) {
       throw new RemotingException(this, "Failed to send message " + message + " to " + getRemoteAddress() + ", cause: " + e.getMessage(), e);
@@ -137,6 +140,12 @@ public class GrpcServerChannel extends AbstractChannel {
   @Override
   public void removeAttribute(String key) {
     attributes.remove(key);
+  }
+
+  static void removeChannelIfDisconnected(StreamObserver<GrpcReply> streamObserver) {
+    if (streamObserver != null) {
+      CHANNEL_MAP.remove(streamObserver);
+    }
   }
 
   @Override

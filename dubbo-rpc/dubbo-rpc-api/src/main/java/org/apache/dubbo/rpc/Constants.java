@@ -94,7 +94,7 @@ public interface Constants {
 
     String LOCAL_PROTOCOL = "injvm";
 
-    String DEFAULT_REMOTING_SERVER = "netty";
+    String DEFAULT_REMOTING_SERVER = "grpc";
 
     String SCOPE_KEY = "scope";
     String SCOPE_LOCAL = "local";

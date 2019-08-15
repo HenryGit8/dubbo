@@ -39,6 +39,6 @@
         <module>dubbo-remoting-zookeeper</module>
         <module>dubbo-remoting-netty4</module>
         <module>dubbo-remoting-etcd3</module>
-      <module>dubbo-remoting-grpc</module>
+         <module>dubbo-remoting-grpc</module>
     </modules>
 </project>

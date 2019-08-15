@@ -22,15 +22,20 @@ import org.apache.dubbo.config.ApplicationConfig;
 import org.apache.dubbo.config.RegistryConfig;
 import org.apache.dubbo.config.ServiceConfig;
 import org.apache.dubbo.demo.DemoService;
+import org.apache.dubbo.remoting.transport.grpc.GrpcServer;
 
 public class Application {
-    public static void main(String[] args) throws Exception {
-        ServiceConfig<DemoServiceImpl> service = new ServiceConfig<>();
-        service.setApplication(new ApplicationConfig("dubbo-demo-api-provider"));
-        service.setRegistry(new RegistryConfig("zookeeper://127.0.0.1:2181"));
-        service.setInterface(DemoService.class);
-        service.setRef(new DemoServiceImpl());
-        service.export();
-        System.in.read();
-    }
+  public static void main(String[] args) throws Exception {
+    ServiceConfig<DemoServiceImpl> service = new ServiceConfig<>();
+    ApplicationConfig applicationConfig = new ApplicationConfig("dubbo-demo-api-provider");
+    applicationConfig.setQosPort(28990);
+    service.setApplication(applicationConfig);
+    RegistryConfig registryConfig = new RegistryConfig("zookeeper://115.159.108.107:2181");
+    registryConfig.setTimeout(60000);
+    service.setRegistry(registryConfig);
+    service.setInterface(DemoService.class);
+    service.setRef(new DemoServiceImpl());
+    service.export();
+    System.in.read();
+  }
 }
