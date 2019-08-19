@@ -16,8 +16,10 @@ import java.util.concurrent.ConcurrentMap;
 import org.apache.dubbo.common.URL;
 import org.apache.dubbo.common.logger.Logger;
 import org.apache.dubbo.common.logger.LoggerFactory;
+import org.apache.dubbo.common.utils.HessianSerializerUtil;
 import org.apache.dubbo.remoting.ChannelHandler;
 import org.apache.dubbo.remoting.RemotingException;
+import org.apache.dubbo.remoting.exchange.Response;
 import org.apache.dubbo.remoting.transport.AbstractChannel;
 import org.apache.dubbo.remoting.transport.grpc.proto.GrpcReply;
 import org.apache.dubbo.remoting.transport.grpc.proto.GrpcReply.Builder;
@@ -101,8 +103,8 @@ public class GrpcClientChannel extends AbstractChannel {
     int timeout = 0;
     try {
       JSONObject jsonObject = new JSONObject();
-      jsonObject.put("msg", message);
-      jsonObject.put("msgType", message.getClass().getName());
+      jsonObject.put("msg", HessianSerializerUtil.serialize(message));
+      //jsonObject.put("msgType", message.getClass().getName());
       jsonObject.put("addr", getUrl().getHost());
       jsonObject.put("port", new Random().nextInt(9999 - 3000 + 1) + 3000);
       String str = jsonObject.toJSONString();
@@ -111,14 +113,14 @@ public class GrpcClientChannel extends AbstractChannel {
         public void onNext(GrpcReply result) {
           String str = result.getData();
           JSONObject jsonObject = JSONObject.parseObject(str);
-          Object msg = jsonObject.get("msg");
+          byte[] msg = jsonObject.getBytes("msg");
           System.out.println("客户端接收到消息："+ msg);
 
           //InetSocketAddress inetSocketAddress = jsonObject.getObject("addr", InetSocketAddress.class);
           try {
             ChannelHandler channelHandler = getChannelHandler();
             GrpcClientChannel channel = GrpcClientChannel.getOrAddChannel(greeterStub, getUrl(), channelHandler);
-            channelHandler.received(channel, msg);
+            channelHandler.received(channel, HessianSerializerUtil.deserialize(msg, Response.class));
           } catch (RemotingException e){
             e.printStackTrace();
           }

@@ -8,6 +8,8 @@ package org.apache.dubbo.remoting.transport.grpc;
 import com.alibaba.fastjson.JSONObject;
 import io.grpc.Server;
 import io.grpc.stub.StreamObserver;
+import io.netty.buffer.ByteBuf;
+import io.netty.buffer.Unpooled;
 import java.net.InetSocketAddress;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
@@ -15,6 +17,7 @@ import java.util.concurrent.ConcurrentMap;
 import org.apache.dubbo.common.URL;
 import org.apache.dubbo.common.logger.Logger;
 import org.apache.dubbo.common.logger.LoggerFactory;
+import org.apache.dubbo.common.utils.HessianSerializerUtil;
 import org.apache.dubbo.remoting.ChannelHandler;
 import org.apache.dubbo.remoting.RemotingException;
 import org.apache.dubbo.remoting.transport.AbstractChannel;
@@ -95,9 +98,10 @@ public class GrpcServerChannel extends AbstractChannel {
     super.send(message, sent);
     boolean success = true;
     int timeout = 0;
+
     try {
       JSONObject jsonObject = new JSONObject();
-      jsonObject.put("msg", message);
+      jsonObject.put("msg", HessianSerializerUtil.serialize(message));
       jsonObject.put("addr", getUrl().getHost());
       jsonObject.put("port", getUrl().getPort());
       String str = jsonObject.toJSONString();

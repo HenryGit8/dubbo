@@ -13,6 +13,7 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import org.apache.dubbo.common.URL;
+import org.apache.dubbo.common.utils.HessianSerializerUtil;
 import org.apache.dubbo.common.utils.NetUtils;
 import org.apache.dubbo.remoting.Channel;
 import org.apache.dubbo.remoting.ChannelHandler;
@@ -52,9 +53,10 @@ public class GrpcHandler extends GreeterGrpc.GreeterImplBase {
         channel.setLocalAddress(new InetSocketAddress(url.getPort()));
         String grpcRequestData = grpcRequest.getData();
         JSONObject jsonObject = JSONObject.parseObject(grpcRequestData);
-        String msgType = jsonObject.getString("msgType");
-        JSONObject msg = jsonObject.getJSONObject("msg");
-        Request request = new Request();
+        //String msgType = jsonObject.getString("msgType");
+        byte[] msg = jsonObject.getBytes("msg");
+        Object object = HessianSerializerUtil.deserialize(msg, Request.class);
+        /*Request request = new Request();
         if(Request.class.getName().equals(msgType)){
           request.setBroken(msg.getBoolean("broken"));
           if(msg.getBoolean("event")){
@@ -70,7 +72,7 @@ public class GrpcHandler extends GreeterGrpc.GreeterImplBase {
           request.setHeartbeat(msg.getBoolean("heartbeat"));
         }else {
           System.out.println("msgType");
-        }
+        }*/
         System.out.println("服务器接收到消息："+jsonObject.toJSONString());
         String addr = jsonObject.getString("addr");
         Integer port = jsonObject.getInteger("port");
@@ -80,7 +82,7 @@ public class GrpcHandler extends GreeterGrpc.GreeterImplBase {
           if (channel != null) {
             channels.put(NetUtils.toAddressString(inetSocketAddress), channel);
           }
-          handler.received(channel, request);
+          handler.received(channel, object);
         } catch (RemotingException remotingException) {
           remotingException.printStackTrace();
         }

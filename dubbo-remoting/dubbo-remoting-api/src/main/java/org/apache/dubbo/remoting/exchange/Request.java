@@ -16,6 +16,7 @@
  */
 package org.apache.dubbo.remoting.exchange;
 
+import java.io.Serializable;
 import org.apache.dubbo.common.utils.StringUtils;
 
 import java.util.concurrent.atomic.AtomicLong;
@@ -23,7 +24,7 @@ import java.util.concurrent.atomic.AtomicLong;
 /**
  * Request.
  */
-public class Request {
+public class Request implements Serializable {
 
     public static final String HEARTBEAT_EVENT = null;
 
