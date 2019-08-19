@@ -5,10 +5,10 @@
 */
 package org.apache.dubbo.remoting.transport.grpc;
 
-import com.alibaba.fastjson.JSONObject;
-import io.grpc.ManagedChannel;
+import com.google.protobuf.ByteString;
 import io.grpc.stub.StreamObserver;
 import java.net.InetSocketAddress;
+import java.util.HashMap;
 import java.util.Map;
 import java.util.Random;
 import java.util.concurrent.ConcurrentHashMap;
@@ -19,10 +19,8 @@ import org.apache.dubbo.common.logger.LoggerFactory;
 import org.apache.dubbo.common.utils.HessianSerializerUtil;
 import org.apache.dubbo.remoting.ChannelHandler;
 import org.apache.dubbo.remoting.RemotingException;
-import org.apache.dubbo.remoting.exchange.Response;
 import org.apache.dubbo.remoting.transport.AbstractChannel;
 import org.apache.dubbo.remoting.transport.grpc.proto.GrpcReply;
-import org.apache.dubbo.remoting.transport.grpc.proto.GrpcReply.Builder;
 import org.apache.dubbo.remoting.transport.grpc.proto.GrpcRequest;
 
 /**
@@ -102,25 +100,21 @@ public class GrpcClientChannel extends AbstractChannel {
     boolean success = true;
     int timeout = 0;
     try {
-      JSONObject jsonObject = new JSONObject();
-      jsonObject.put("msg", HessianSerializerUtil.serialize(message));
-      //jsonObject.put("msgType", message.getClass().getName());
-      jsonObject.put("addr", getUrl().getHost());
-      jsonObject.put("port", new Random().nextInt(9999 - 3000 + 1) + 3000);
-      String str = jsonObject.toJSONString();
+      HashMap rq = new HashMap();
+      rq.put("msg", message);
+      rq.put("addr", getUrl().getHost());
+      rq.put("port", new Random().nextInt(9999 - 3000 + 1) + 3000);
       responseObserver = new StreamObserver<GrpcReply>() {
         @Override
         public void onNext(GrpcReply result) {
-          String str = result.getData();
-          JSONObject jsonObject = JSONObject.parseObject(str);
-          byte[] msg = jsonObject.getBytes("msg");
-          System.out.println("客户端接收到消息："+ msg);
-
-          //InetSocketAddress inetSocketAddress = jsonObject.getObject("addr", InetSocketAddress.class);
+          ByteString str = result.getData();
+          byte[] map = str.toByteArray();
+          HashMap hashMap = HessianSerializerUtil.deserialize(map, HashMap.class);
+          System.out.println("客户端接收到消息："+ hashMap);
           try {
             ChannelHandler channelHandler = getChannelHandler();
             GrpcClientChannel channel = GrpcClientChannel.getOrAddChannel(greeterStub, getUrl(), channelHandler);
-            channelHandler.received(channel, HessianSerializerUtil.deserialize(msg, Response.class));
+            channelHandler.received(channel, hashMap.get("msg"));
           } catch (RemotingException e){
             e.printStackTrace();
           }
@@ -136,8 +130,8 @@ public class GrpcClientChannel extends AbstractChannel {
         }
       };
       StreamObserver<GrpcRequest> streamObserver = greeterStub.getRp(responseObserver);
-      GrpcRequest grpcRequest = GrpcRequest.newBuilder().setData(str).build();
-      System.out.println(str);
+      GrpcRequest grpcRequest = GrpcRequest.newBuilder().setData(ByteString.copyFrom(HessianSerializerUtil.serialize(rq))).build();
+      System.out.println(rq);
       System.out.println("客户端发送请求："+ grpcRequest);
       streamObserver.onNext(grpcRequest);
     } catch (Throwable e) {

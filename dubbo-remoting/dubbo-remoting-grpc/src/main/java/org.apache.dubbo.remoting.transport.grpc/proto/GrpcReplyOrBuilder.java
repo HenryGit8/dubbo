@@ -8,12 +8,7 @@ public interface GrpcReplyOrBuilder extends
     com.google.protobuf.MessageOrBuilder {
 
   /**
-   * <code>string data = 1;</code>
+   * <code>bytes data = 1;</code>
    */
-  String getData();
-  /**
-   * <code>string data = 1;</code>
-   */
-  com.google.protobuf.ByteString
-      getDataBytes();
+  com.google.protobuf.ByteString getData();
 }

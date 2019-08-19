@@ -34,8 +34,8 @@ public final class GrpcProto {
   static {
     String[] descriptorData = {
       "\n\020helloworld.proto\022\005proto\"\033\n\013GrpcRequest" +
-      "\022\014\n\004data\030\001 \001(\t\"\031\n\tGrpcReply\022\014\n\004data\030\001 \001(" +
-      "\t2>\n\007Greeter\0223\n\005getRp\022\022.proto.GrpcReques" +
+      "\022\014\n\004data\030\001 \001(\014\"\031\n\tGrpcReply\022\014\n\004data\030\001 \001(" +
+      "\0142>\n\007Greeter\0223\n\005getRp\022\022.proto.GrpcReques" +
       "t\032\020.proto.GrpcReply\"\000(\0010\001BC\n.org.apache." +
       "dubbo.remoting.transport.grpc.protoB\tGrp" +
       "cProtoP\001\242\002\003HLWb\006proto3"

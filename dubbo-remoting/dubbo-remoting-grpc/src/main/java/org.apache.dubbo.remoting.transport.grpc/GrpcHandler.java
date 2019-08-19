@@ -6,7 +6,7 @@ package org.apache.dubbo.remoting.transport.grpc;
 
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
-import io.grpc.Server;
+import com.google.protobuf.ByteString;
 import io.grpc.stub.StreamObserver;
 import java.net.InetSocketAddress;
 import java.util.HashMap;
@@ -18,7 +18,6 @@ import org.apache.dubbo.common.utils.NetUtils;
 import org.apache.dubbo.remoting.Channel;
 import org.apache.dubbo.remoting.ChannelHandler;
 import org.apache.dubbo.remoting.RemotingException;
-import org.apache.dubbo.remoting.exchange.Request;
 import org.apache.dubbo.remoting.transport.grpc.proto.GrpcReply;
 import org.apache.dubbo.remoting.transport.grpc.proto.GrpcRequest;
 import org.apache.dubbo.rpc.RpcInvocation;
@@ -51,31 +50,12 @@ public class GrpcHandler extends GreeterGrpc.GreeterImplBase {
       @Override
       public void onNext(GrpcRequest grpcRequest) {
         channel.setLocalAddress(new InetSocketAddress(url.getPort()));
-        String grpcRequestData = grpcRequest.getData();
-        JSONObject jsonObject = JSONObject.parseObject(grpcRequestData);
-        //String msgType = jsonObject.getString("msgType");
-        byte[] msg = jsonObject.getBytes("msg");
-        Object object = HessianSerializerUtil.deserialize(msg, Request.class);
-        /*Request request = new Request();
-        if(Request.class.getName().equals(msgType)){
-          request.setBroken(msg.getBoolean("broken"));
-          if(msg.getBoolean("event")){
-            request.setEvent(msg.getString("data"));
-          }
-          request.setTwoWay(msg.getBoolean("twoWay"));
-          request.setVersion(msg.getString("version"));
-          try{
-            request.setData(codeRpc(msg.getJSONObject("data")));
-          }catch (Exception e){
-            e.printStackTrace();
-          }
-          request.setHeartbeat(msg.getBoolean("heartbeat"));
-        }else {
-          System.out.println("msgType");
-        }*/
-        System.out.println("服务器接收到消息："+jsonObject.toJSONString());
-        String addr = jsonObject.getString("addr");
-        Integer port = jsonObject.getInteger("port");
+        ByteString grpcRequestData = grpcRequest.getData();
+        HashMap hashMap = HessianSerializerUtil.deserialize(grpcRequestData.toByteArray(), HashMap.class);
+        Object object = hashMap.get("msg");
+        System.out.println("服务器接收到消息："+hashMap);
+        String addr = (String) hashMap.get("addr");
+        Integer port = (Integer) hashMap.get("port");
         InetSocketAddress inetSocketAddress = new InetSocketAddress(addr, port);
         channel.setRemoteAddress(inetSocketAddress);
         try {

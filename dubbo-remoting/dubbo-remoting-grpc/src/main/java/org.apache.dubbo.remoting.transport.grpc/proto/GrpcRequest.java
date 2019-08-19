@@ -3,6 +3,8 @@
 
 package org.apache.dubbo.remoting.transport.grpc.proto;
 
+import org.apache.dubbo.remoting.transport.grpc.proto.GrpcRequestOrBuilder;
+
 /**
  * <pre>
  * The request message containing the user's name.
@@ -19,7 +21,7 @@ public  final class GrpcRequest extends
     super(builder);
   }
   private GrpcRequest() {
-    data_ = "";
+    data_ = com.google.protobuf.ByteString.EMPTY;
   }
 
   @Override
@@ -48,9 +50,8 @@ public  final class GrpcRequest extends
             break;
           }
           case 10: {
-            String s = input.readStringRequireUtf8();
 
-            data_ = s;
+            data_ = input.readBytes();
             break;
           }
         }
@@ -77,37 +78,12 @@ public  final class GrpcRequest extends
   }
 
   public static final int DATA_FIELD_NUMBER = 1;
-  private volatile Object data_;
+  private com.google.protobuf.ByteString data_;
   /**
-   * <code>string data = 1;</code>
+   * <code>bytes data = 1;</code>
    */
-  public String getData() {
-    Object ref = data_;
-    if (ref instanceof String) {
-      return (String) ref;
-    } else {
-      com.google.protobuf.ByteString bs =
-          (com.google.protobuf.ByteString) ref;
-      String s = bs.toStringUtf8();
-      data_ = s;
-      return s;
-    }
-  }
-  /**
-   * <code>string data = 1;</code>
-   */
-  public com.google.protobuf.ByteString
-      getDataBytes() {
-    Object ref = data_;
-    if (ref instanceof String) {
-      com.google.protobuf.ByteString b =
-          com.google.protobuf.ByteString.copyFromUtf8(
-              (String) ref);
-      data_ = b;
-      return b;
-    } else {
-      return (com.google.protobuf.ByteString) ref;
-    }
+  public com.google.protobuf.ByteString getData() {
+    return data_;
   }
 
   private byte memoizedIsInitialized = -1;
@@ -122,8 +98,8 @@ public  final class GrpcRequest extends
 
   public void writeTo(com.google.protobuf.CodedOutputStream output)
                       throws java.io.IOException {
-    if (!getDataBytes().isEmpty()) {
-      com.google.protobuf.GeneratedMessageV3.writeString(output, 1, data_);
+    if (!data_.isEmpty()) {
+      output.writeBytes(1, data_);
     }
   }
 
@@ -132,8 +108,9 @@ public  final class GrpcRequest extends
     if (size != -1) return size;
 
     size = 0;
-    if (!getDataBytes().isEmpty()) {
-      size += com.google.protobuf.GeneratedMessageV3.computeStringSize(1, data_);
+    if (!data_.isEmpty()) {
+      size += com.google.protobuf.CodedOutputStream
+        .computeBytesSize(1, data_);
     }
     memoizedSize = size;
     return size;
@@ -298,7 +275,7 @@ public  final class GrpcRequest extends
     }
     public Builder clear() {
       super.clear();
-      data_ = "";
+      data_ = com.google.protobuf.ByteString.EMPTY;
 
       return this;
     }
@@ -364,9 +341,8 @@ public  final class GrpcRequest extends
 
     public Builder mergeFrom(org.apache.dubbo.remoting.transport.grpc.proto.GrpcRequest other) {
       if (other == org.apache.dubbo.remoting.transport.grpc.proto.GrpcRequest.getDefaultInstance()) return this;
-      if (!other.getData().isEmpty()) {
-        data_ = other.data_;
-        onChanged();
+      if (other.getData() != com.google.protobuf.ByteString.EMPTY) {
+        setData(other.getData());
       }
       onChanged();
       return this;
@@ -394,43 +370,17 @@ public  final class GrpcRequest extends
       return this;
     }
 
-    private Object data_ = "";
+    private com.google.protobuf.ByteString data_ = com.google.protobuf.ByteString.EMPTY;
     /**
-     * <code>string data = 1;</code>
+     * <code>bytes data = 1;</code>
      */
-    public String getData() {
-      Object ref = data_;
-      if (!(ref instanceof String)) {
-        com.google.protobuf.ByteString bs =
-            (com.google.protobuf.ByteString) ref;
-        String s = bs.toStringUtf8();
-        data_ = s;
-        return s;
-      } else {
-        return (String) ref;
-      }
+    public com.google.protobuf.ByteString getData() {
+      return data_;
     }
     /**
-     * <code>string data = 1;</code>
+     * <code>bytes data = 1;</code>
      */
-    public com.google.protobuf.ByteString
-        getDataBytes() {
-      Object ref = data_;
-      if (ref instanceof String) {
-        com.google.protobuf.ByteString b =
-            com.google.protobuf.ByteString.copyFromUtf8(
-                (String) ref);
-        data_ = b;
-        return b;
-      } else {
-        return (com.google.protobuf.ByteString) ref;
-      }
-    }
-    /**
-     * <code>string data = 1;</code>
-     */
-    public Builder setData(
-        String value) {
+    public Builder setData(com.google.protobuf.ByteString value) {
       if (value == null) {
     throw new NullPointerException();
   }
@@ -440,25 +390,11 @@ public  final class GrpcRequest extends
       return this;
     }
     /**
-     * <code>string data = 1;</code>
+     * <code>bytes data = 1;</code>
      */
     public Builder clearData() {
 
       data_ = getDefaultInstance().getData();
-      onChanged();
-      return this;
-    }
-    /**
-     * <code>string data = 1;</code>
-     */
-    public Builder setDataBytes(
-        com.google.protobuf.ByteString value) {
-      if (value == null) {
-    throw new NullPointerException();
-  }
-  checkByteStringIsUtf8(value);
-
-      data_ = value;
       onChanged();
       return this;
     }

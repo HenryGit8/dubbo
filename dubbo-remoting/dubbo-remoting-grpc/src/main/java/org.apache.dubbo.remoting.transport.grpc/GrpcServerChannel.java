@@ -5,12 +5,10 @@
 */
 package org.apache.dubbo.remoting.transport.grpc;
 
-import com.alibaba.fastjson.JSONObject;
-import io.grpc.Server;
+import com.google.protobuf.ByteString;
 import io.grpc.stub.StreamObserver;
-import io.netty.buffer.ByteBuf;
-import io.netty.buffer.Unpooled;
 import java.net.InetSocketAddress;
+import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
@@ -100,13 +98,12 @@ public class GrpcServerChannel extends AbstractChannel {
     int timeout = 0;
 
     try {
-      JSONObject jsonObject = new JSONObject();
-      jsonObject.put("msg", HessianSerializerUtil.serialize(message));
-      jsonObject.put("addr", getUrl().getHost());
-      jsonObject.put("port", getUrl().getPort());
-      String str = jsonObject.toJSONString();
-      Builder response = GrpcReply.newBuilder().setData(str);
-      System.out.println("json："+ str);
+      HashMap hashMap = new HashMap();
+      hashMap.put("msg", message);
+      hashMap.put("addr", getUrl().getHost());
+      hashMap.put("port", getUrl().getPort());
+      Builder response = GrpcReply.newBuilder().setData(ByteString.copyFrom(HessianSerializerUtil.serialize(hashMap)));
+      System.out.println("json："+ hashMap);
       grpcReplyStreamObserver.onNext(response.build());
     } catch (Throwable e) {
       throw new RemotingException(this, "Failed to send message " + message + " to " + getRemoteAddress() + ", cause: " + e.getMessage(), e);
