@@ -48,8 +48,8 @@ public class GrpcServer extends AbstractServer implements Server {
     GrpcHandler grpcHandler = new GrpcHandler(getUrl(), this);
     server = NettyServerBuilder.forPort(getBindAddress().getPort()).addService(grpcHandler).build().start();
     channels = grpcHandler.getChannels();
-    System.out.println("Server started, listening on " + getBindAddress().getPort());
-    logger.info("Server started, listening on " + getBindAddress().getPort());
+    //System.out.println("Server started, listening on " + getBindAddress().getPort());
+    logger.info("Grpc server started, listening on " + getBindAddress().getPort());
     //TODO
   }
 

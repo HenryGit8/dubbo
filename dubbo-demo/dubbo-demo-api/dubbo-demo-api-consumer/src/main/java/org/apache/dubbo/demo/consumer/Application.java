@@ -18,21 +18,73 @@
  */
 package org.apache.dubbo.demo.consumer;
 
+import java.util.concurrent.LinkedBlockingQueue;
+import java.util.concurrent.ThreadPoolExecutor;
+import java.util.concurrent.TimeUnit;
 import org.apache.dubbo.config.ApplicationConfig;
 import org.apache.dubbo.config.ReferenceConfig;
 import org.apache.dubbo.config.RegistryConfig;
 import org.apache.dubbo.demo.DemoService;
 
 public class Application {
+
+    private static int re = 0;
+    private static ThreadPoolExecutor executor  = new ThreadPoolExecutor(100, 101, 10l, TimeUnit.SECONDS,
+        new LinkedBlockingQueue<Runnable>(10000));
     public static void main(String[] args) {
         ReferenceConfig<DemoService> reference = new ReferenceConfig<>();
         ApplicationConfig applicationConfig = new ApplicationConfig("dubbo-demo-api-consumer");
         applicationConfig.setQosPort(22344);
         reference.setApplication(applicationConfig);
-        reference.setRegistry(new RegistryConfig("zookeeper://115.159.108.107:2181"));
+        reference.setRegistry(new RegistryConfig("zookeeper://106.12.10.34:2181"));
         reference.setInterface(DemoService.class);
         DemoService service = reference.get();
-        String message = service.sayHello("dubbo");
-        System.out.println(message);
+        long before = System.currentTimeMillis();
+        System.out.println(service.sayHello("dubbo"));
+        System.out.println(service.sayHello("dubbo"));
+        System.out.println(service.sayHello("dubbo"));
+        System.out.println(service.sayHello("dubbo"));
+        System.out.println(service.sayHello("dubbo"));
+        System.out.println(service.sayHello("dubbo"));
+        System.out.println(service.sayHello("dubbo"));
+        System.out.println(service.sayHello("dubbo"));
+        System.out.println(service.sayHello("dubbo"));
+        System.out.println(service.sayHello("dubbo"));
+        System.out.println(service.sayHello("dubbo"));
+        System.out.println(service.sayHello("dubbo"));
+        System.out.println(service.sayHello("dubbo"));
+        System.out.println(service.sayHello("dubbo"));
+        System.out.println(service.sayHello("dubbo"));
+        System.out.println(service.sayHello("dubbo"));
+        System.out.println(service.sayHello("dubbo"));
+        System.out.println(service.sayHello("dubbo"));
+        System.out.println(service.sayHello("dubbo"));
+        System.out.println(service.sayHello("dubbo"));
+        System.out.println(service.sayHello("dubbo"));
+        System.out.println(service.sayHello("dubbo"));
+        System.out.println(service.sayHello("dubbo"));
+        System.out.println(service.sayHello("dubbo"));
+        System.out.println(service.sayHello("dubbo"));
+        System.out.println(service.sayHello("dubbo"));
+        System.out.println(service.sayHello("dubbo"));
+        System.out.println(service.sayHello("dubbo"));
+        System.out.println(service.sayHello("dubbo"));
+        System.out.println(service.sayHello("dubbo"));
+        System.out.println(service.sayHello("dubbo"));
+        System.out.println(service.sayHello("dubbo"));
+        /*for(int i=0;i<2;i++){
+            Runnable task = new Runnable() {
+                @Override
+                public void run() {
+                    if (service.sayHello("dubbo").equals("true")) {
+                        re = re + 1;
+                        System.out.println("完成"+re);
+                    }
+                }
+            };
+            executor.execute(task);
+        }*/
+        long after = System.currentTimeMillis();
+        System.out.println("总共花费时间："+(after - before)+",完成："+re);
     }
 }

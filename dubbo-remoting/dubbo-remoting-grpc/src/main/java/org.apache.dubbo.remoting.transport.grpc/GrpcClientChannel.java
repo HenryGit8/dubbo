@@ -8,7 +8,9 @@ package org.apache.dubbo.remoting.transport.grpc;
 import com.google.protobuf.ByteString;
 import io.grpc.stub.StreamObserver;
 import java.net.InetSocketAddress;
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Random;
 import java.util.concurrent.ConcurrentHashMap;
@@ -43,6 +45,8 @@ public class GrpcClientChannel extends AbstractChannel {
   private final Map<String, Object> attributes = new ConcurrentHashMap<String, Object>();
 
   private StreamObserver<GrpcReply> responseObserver;
+
+  private StreamObserver<GrpcRequest> streamObserver;
 
   private static final ConcurrentMap<GreeterGrpc.GreeterStub, GrpcClientChannel> CHANNEL_MAP = new ConcurrentHashMap<GreeterGrpc.GreeterStub, GrpcClientChannel>();
 
@@ -95,7 +99,7 @@ public class GrpcClientChannel extends AbstractChannel {
 
   @Override
   public void send(Object message, boolean sent) throws RemotingException {
-    System.out.println("客户端发送消息："+ message);
+    //System.out.println("客户端即将发送消息："+ message);
     super.send(message, sent);
     boolean success = true;
     int timeout = 0;
@@ -110,11 +114,12 @@ public class GrpcClientChannel extends AbstractChannel {
           ByteString str = result.getData();
           byte[] map = str.toByteArray();
           HashMap hashMap = HessianSerializerUtil.deserialize(map, HashMap.class);
-          System.out.println("客户端接收到消息："+ hashMap);
+          //System.out.println("客户端接收到消息："+ hashMap);
           try {
             ChannelHandler channelHandler = getChannelHandler();
             GrpcClientChannel channel = GrpcClientChannel.getOrAddChannel(greeterStub, getUrl(), channelHandler);
             channelHandler.received(channel, hashMap.get("msg"));
+            streamObserver.onCompleted();
           } catch (RemotingException e){
             e.printStackTrace();
           }
@@ -129,10 +134,9 @@ public class GrpcClientChannel extends AbstractChannel {
           logger.info("call finish");
         }
       };
-      StreamObserver<GrpcRequest> streamObserver = greeterStub.getRp(responseObserver);
+      streamObserver = greeterStub.getRp(responseObserver);
       GrpcRequest grpcRequest = GrpcRequest.newBuilder().setData(ByteString.copyFrom(HessianSerializerUtil.serialize(rq))).build();
-      System.out.println(rq);
-      System.out.println("客户端发送请求："+ grpcRequest);
+      //System.out.println("客户端发送请求："+ grpcRequest);
       streamObserver.onNext(grpcRequest);
     } catch (Throwable e) {
       throw new RemotingException(this, "Failed to send message " + message + " to " + getRemoteAddress() + ", cause: " + e.getMessage(), e);

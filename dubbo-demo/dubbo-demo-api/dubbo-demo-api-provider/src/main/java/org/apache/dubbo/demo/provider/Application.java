@@ -22,7 +22,6 @@ import org.apache.dubbo.config.ApplicationConfig;
 import org.apache.dubbo.config.RegistryConfig;
 import org.apache.dubbo.config.ServiceConfig;
 import org.apache.dubbo.demo.DemoService;
-import org.apache.dubbo.remoting.transport.grpc.GrpcServer;
 
 public class Application {
   public static void main(String[] args) throws Exception {
@@ -30,7 +29,7 @@ public class Application {
     ApplicationConfig applicationConfig = new ApplicationConfig("dubbo-demo-api-provider");
     applicationConfig.setQosPort(28990);
     service.setApplication(applicationConfig);
-    RegistryConfig registryConfig = new RegistryConfig("zookeeper://115.159.108.107:2181");
+    RegistryConfig registryConfig = new RegistryConfig("zookeeper://106.12.10.34:2181");
     registryConfig.setTimeout(60000);
     service.setRegistry(registryConfig);
     service.setInterface(DemoService.class);

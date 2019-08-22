@@ -53,7 +53,7 @@ public class GrpcHandler extends GreeterGrpc.GreeterImplBase {
         ByteString grpcRequestData = grpcRequest.getData();
         HashMap hashMap = HessianSerializerUtil.deserialize(grpcRequestData.toByteArray(), HashMap.class);
         Object object = hashMap.get("msg");
-        System.out.println("服务器接收到消息："+hashMap);
+      //  System.out.println("服务器接收到消息："+hashMap);
         String addr = (String) hashMap.get("addr");
         Integer port = (Integer) hashMap.get("port");
         InetSocketAddress inetSocketAddress = new InetSocketAddress(addr, port);
