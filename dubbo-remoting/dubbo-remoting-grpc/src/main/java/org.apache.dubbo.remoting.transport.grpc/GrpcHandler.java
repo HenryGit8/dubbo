@@ -80,7 +80,7 @@ public class GrpcHandler extends GreeterGrpc.GreeterImplBase {
 
       @Override
       public void onCompleted() {
-        responseObserver.onCompleted();
+        //responseObserver.onCompleted();
       }
     };
     return streamObserver;

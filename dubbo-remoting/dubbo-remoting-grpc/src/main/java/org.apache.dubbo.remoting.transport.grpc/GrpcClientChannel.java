@@ -127,7 +127,7 @@ public class GrpcClientChannel extends AbstractChannel {
 
         @Override
         public void onCompleted() {
-          logger.info("call finish");
+          //logger.info("call finish");
         }
       };
       GrpcRequest grpcRequest = GrpcRequest.newBuilder().setData(ByteString.copyFrom(HessianSerializerUtil.serialize(rq))).build();
