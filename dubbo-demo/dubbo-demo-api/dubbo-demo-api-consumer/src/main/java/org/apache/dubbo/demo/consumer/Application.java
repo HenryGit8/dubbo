@@ -28,7 +28,7 @@ import org.apache.dubbo.demo.DemoService;
 
 public class Application {
 
-    private static int thredCount = 10;
+    private static int thredCount = 100;
 
     private static int re = 0;
     private static ThreadPoolExecutor executor  = new ThreadPoolExecutor(100, 101, 10l, TimeUnit.SECONDS,
@@ -49,13 +49,14 @@ public class Application {
                     System.out.println(service.sayHello("dubbo"));
                     re = re + 1;
                     if(re == thredCount){
+                        long after = System.currentTimeMillis();
+                        System.out.println("总共花费时间："+(after-before));
                         executor.shutdown();
+
                     }
                 }
             };
             executor.execute(task);
         }
-
-        long after = System.currentTimeMillis();
     }
 }

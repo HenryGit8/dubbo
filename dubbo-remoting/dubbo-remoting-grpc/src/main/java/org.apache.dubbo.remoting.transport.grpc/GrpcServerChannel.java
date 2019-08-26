@@ -92,7 +92,6 @@ public class GrpcServerChannel extends AbstractChannel {
 
   @Override
   public void send(Object message, boolean sent) throws RemotingException {
-    //System.out.println("发送消息："+ message);
     super.send(message, sent);
     boolean success = true;
     int timeout = 0;
@@ -103,7 +102,6 @@ public class GrpcServerChannel extends AbstractChannel {
       hashMap.put("addr", getUrl().getHost());
       hashMap.put("port", getUrl().getPort());
       Builder response = GrpcReply.newBuilder().setData(ByteString.copyFrom(HessianSerializerUtil.serialize(hashMap)));
-      //System.out.println("json："+ hashMap);
       grpcReplyStreamObserver.onNext(response.build());
       grpcReplyStreamObserver.onCompleted();
     } catch (Throwable e) {

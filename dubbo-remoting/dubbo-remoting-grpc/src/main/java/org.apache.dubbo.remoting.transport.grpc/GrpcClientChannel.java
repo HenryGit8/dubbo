@@ -97,7 +97,6 @@ public class GrpcClientChannel extends AbstractChannel {
 
   @Override
   public void send(Object message, boolean sent) throws RemotingException {
-    //System.out.println("客户端即将发送消息："+ message);
     super.send(message, sent);
     boolean success = true;
     int timeout = 0;
@@ -112,7 +111,6 @@ public class GrpcClientChannel extends AbstractChannel {
           ByteString str = result.getData();
           byte[] map = str.toByteArray();
           HashMap hashMap = HessianSerializerUtil.deserialize(map, HashMap.class);
-          //System.out.println("客户端接收到消息："+ hashMap);
           try {
             ChannelHandler channelHandler = getChannelHandler();
             GrpcClientChannel channel = GrpcClientChannel.getOrAddChannel(greeterStub, getUrl(), channelHandler);
@@ -133,7 +131,6 @@ public class GrpcClientChannel extends AbstractChannel {
         }
       };
       GrpcRequest grpcRequest = GrpcRequest.newBuilder().setData(ByteString.copyFrom(HessianSerializerUtil.serialize(rq))).build();
-      //System.out.println("客户端发送请求："+ grpcRequest);
       grpcRequestStreamObserver(responseObserver).onNext(grpcRequest);
     } catch (Throwable e) {
       throw new RemotingException(this, "Failed to send message " + message + " to " + getRemoteAddress() + ", cause: " + e.getMessage(), e);

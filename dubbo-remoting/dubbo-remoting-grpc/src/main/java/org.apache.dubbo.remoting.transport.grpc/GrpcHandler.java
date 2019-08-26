@@ -53,7 +53,6 @@ public class GrpcHandler extends GreeterGrpc.GreeterImplBase {
         ByteString grpcRequestData = grpcRequest.getData();
         HashMap hashMap = HessianSerializerUtil.deserialize(grpcRequestData.toByteArray(), HashMap.class);
         Object object = hashMap.get("msg");
-      //  System.out.println("服务器接收到消息："+hashMap);
         String addr = (String) hashMap.get("addr");
         Integer port = (Integer) hashMap.get("port");
         InetSocketAddress inetSocketAddress = new InetSocketAddress(addr, port);
@@ -85,31 +84,6 @@ public class GrpcHandler extends GreeterGrpc.GreeterImplBase {
       }
     };
     return streamObserver;
-  }
-
-  private RpcInvocation codeRpc(JSONObject data) throws Exception{
-    RpcInvocation rpcInvocation = new RpcInvocation();
-    JSONObject attachmentsjs = data.getJSONObject("attachments");
-    HashMap attachments = new HashMap();
-    for (String s : attachmentsjs.keySet()) {
-      attachments.put(s, attachmentsjs.getString(s));
-    }
-    rpcInvocation.setAttachments(attachments);
-    JSONArray parameterTypesjs = data.getJSONArray("parameterTypes");
-    Class<?>[] classes = new Class[parameterTypesjs.size()];
-    for (int i = 0; i < parameterTypesjs.size(); i++) {
-      classes[i] = Class.forName(parameterTypesjs.getString(i));
-    }
-    rpcInvocation.setParameterTypes(classes);
-    rpcInvocation.setMethodName(data.getString("methodName"));
-    JSONArray argumentsjs = data.getJSONArray("arguments");
-    Object[] arguments = new Object[argumentsjs.size()];
-    for (int i = 0; i < argumentsjs.size(); i++) {
-      arguments[i] = argumentsjs.get(i);
-    }
-    rpcInvocation.setArguments(arguments);
-
-    return rpcInvocation;
   }
 
   public Map<String, Channel> getChannels() {
