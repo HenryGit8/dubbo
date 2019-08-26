@@ -38,14 +38,12 @@ public class GrpcClient extends AbstractClient {
   protected void doOpen() throws Throwable {
     managedChannel = ManagedChannelBuilder.forAddress(getUrl().getHost(),
         getUrl().getPort()).usePlaintext().build();
-    //System.out.println("managedChannel连接："+managedChannel);
   }
 
 
   @Override
   protected void doConnect() throws Throwable {
     greeterStub = GreeterGrpc.newStub(managedChannel);
-    //System.out.println("greeterStub 开始连接。。。");
   }
 
   @Override

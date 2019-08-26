@@ -117,7 +117,7 @@ public class GrpcServerChannel extends AbstractChannel {
 
   @Override
   public void close() {
-    grpcReplyStreamObserver.onCompleted();
+    //grpcReplyStreamObserver.onCompleted();
   }
 
   @Override

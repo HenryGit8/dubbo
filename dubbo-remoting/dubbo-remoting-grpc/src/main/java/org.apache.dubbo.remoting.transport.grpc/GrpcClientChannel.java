@@ -44,9 +44,7 @@ public class GrpcClientChannel extends AbstractChannel {
 
   private final Map<String, Object> attributes = new ConcurrentHashMap<String, Object>();
 
-  private StreamObserver<GrpcReply> responseObserver;
-
-  private StreamObserver<GrpcRequest> streamObserver;
+  private static final ConcurrentMap<StreamObserver<GrpcReply>, StreamObserver<GrpcRequest>> STREAM_OBSERVER_STREAM_OBSERVER_CONCURRENT_MAP = new ConcurrentHashMap<>();
 
   private static final ConcurrentMap<GreeterGrpc.GreeterStub, GrpcClientChannel> CHANNEL_MAP = new ConcurrentHashMap<GreeterGrpc.GreeterStub, GrpcClientChannel>();
 
@@ -108,7 +106,7 @@ public class GrpcClientChannel extends AbstractChannel {
       rq.put("msg", message);
       rq.put("addr", getUrl().getHost());
       rq.put("port", new Random().nextInt(9999 - 3000 + 1) + 3000);
-      responseObserver = new StreamObserver<GrpcReply>() {
+      StreamObserver<GrpcReply> responseObserver = new StreamObserver<GrpcReply>() {
         @Override
         public void onNext(GrpcReply result) {
           ByteString str = result.getData();
@@ -119,7 +117,7 @@ public class GrpcClientChannel extends AbstractChannel {
             ChannelHandler channelHandler = getChannelHandler();
             GrpcClientChannel channel = GrpcClientChannel.getOrAddChannel(greeterStub, getUrl(), channelHandler);
             channelHandler.received(channel, hashMap.get("msg"));
-            streamObserver.onCompleted();
+            grpcRequestStreamObserver(this).onCompleted();
           } catch (RemotingException e){
             e.printStackTrace();
           }
@@ -134,10 +132,9 @@ public class GrpcClientChannel extends AbstractChannel {
           logger.info("call finish");
         }
       };
-      streamObserver = greeterStub.getRp(responseObserver);
       GrpcRequest grpcRequest = GrpcRequest.newBuilder().setData(ByteString.copyFrom(HessianSerializerUtil.serialize(rq))).build();
       //System.out.println("客户端发送请求："+ grpcRequest);
-      streamObserver.onNext(grpcRequest);
+      grpcRequestStreamObserver(responseObserver).onNext(grpcRequest);
     } catch (Throwable e) {
       throw new RemotingException(this, "Failed to send message " + message + " to " + getRemoteAddress() + ", cause: " + e.getMessage(), e);
     }
@@ -147,9 +144,25 @@ public class GrpcClientChannel extends AbstractChannel {
     }
   }
 
+  private StreamObserver<GrpcRequest> grpcRequestStreamObserver(StreamObserver<GrpcReply> responseObserver){
+    if(STREAM_OBSERVER_STREAM_OBSERVER_CONCURRENT_MAP.get(responseObserver) == null){
+      synchronized (this){
+        if(STREAM_OBSERVER_STREAM_OBSERVER_CONCURRENT_MAP.get(responseObserver) == null){
+          StreamObserver<GrpcRequest> streamObserver = greeterStub.getRp(responseObserver);
+          STREAM_OBSERVER_STREAM_OBSERVER_CONCURRENT_MAP.putIfAbsent(responseObserver, streamObserver);
+          return streamObserver;
+        }
+      }
+    }
+    return STREAM_OBSERVER_STREAM_OBSERVER_CONCURRENT_MAP.get(responseObserver);
+  }
+
   @Override
   public void close() {
-    responseObserver.onCompleted();
+    /*for (StreamObserver<GrpcRequest> streamObserver : STREAM_OBSERVER_STREAM_OBSERVER_CONCURRENT_MAP
+        .values()) {
+      streamObserver.onCompleted();
+    }*/
   }
 
   @Override
@@ -216,6 +229,6 @@ public class GrpcClientChannel extends AbstractChannel {
 
   @Override
   public String toString() {
-    return "GrpcClientChannel [channel=" + responseObserver + "]";
+    return "GrpcClientChannel ";
   }
 }

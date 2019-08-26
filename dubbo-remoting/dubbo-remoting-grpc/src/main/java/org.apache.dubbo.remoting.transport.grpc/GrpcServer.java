@@ -72,4 +72,8 @@ public class GrpcServer extends AbstractServer implements Server {
   public Channel getChannel(InetSocketAddress remoteAddress) {
     return channels.get(NetUtils.toAddressString(remoteAddress));
   }
+  @Override
+  public boolean canHandleIdle(){
+    return true;
+  }
 }
