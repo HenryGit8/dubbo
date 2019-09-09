@@ -16,6 +16,7 @@ import java.util.Random;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 import org.apache.dubbo.common.URL;
+import org.apache.dubbo.common.constants.Count;
 import org.apache.dubbo.common.logger.Logger;
 import org.apache.dubbo.common.logger.LoggerFactory;
 import org.apache.dubbo.common.utils.HessianSerializerUtil;
@@ -103,6 +104,7 @@ public class GrpcClientChannel extends AbstractChannel {
     try {
       HashMap rq = new HashMap();
       rq.put("msg", message);
+      rq.put("count", new Integer(Count.count));
       rq.put("addr", getUrl().getHost());
       rq.put("port", new Random().nextInt(9999 - 3000 + 1) + 3000);
       StreamObserver<GrpcReply> responseObserver = new StreamObserver<GrpcReply>() {
@@ -115,7 +117,6 @@ public class GrpcClientChannel extends AbstractChannel {
             ChannelHandler channelHandler = getChannelHandler();
             GrpcClientChannel channel = GrpcClientChannel.getOrAddChannel(greeterStub, getUrl(), channelHandler);
             channelHandler.received(channel, hashMap.get("msg"));
-            grpcRequestStreamObserver(this).onCompleted();
           } catch (RemotingException e){
             e.printStackTrace();
           }
@@ -127,11 +128,10 @@ public class GrpcClientChannel extends AbstractChannel {
 
         @Override
         public void onCompleted() {
-          //logger.info("call finish");
         }
       };
       GrpcRequest grpcRequest = GrpcRequest.newBuilder().setData(ByteString.copyFrom(HessianSerializerUtil.serialize(rq))).build();
-      grpcRequestStreamObserver(responseObserver).onNext(grpcRequest);
+      greeterStub.getRp(responseObserver).onNext(grpcRequest);
     } catch (Throwable e) {
       throw new RemotingException(this, "Failed to send message " + message + " to " + getRemoteAddress() + ", cause: " + e.getMessage(), e);
     }
@@ -141,25 +141,8 @@ public class GrpcClientChannel extends AbstractChannel {
     }
   }
 
-  private StreamObserver<GrpcRequest> grpcRequestStreamObserver(StreamObserver<GrpcReply> responseObserver){
-    if(STREAM_OBSERVER_STREAM_OBSERVER_CONCURRENT_MAP.get(responseObserver) == null){
-      synchronized (this){
-        if(STREAM_OBSERVER_STREAM_OBSERVER_CONCURRENT_MAP.get(responseObserver) == null){
-          StreamObserver<GrpcRequest> streamObserver = greeterStub.getRp(responseObserver);
-          STREAM_OBSERVER_STREAM_OBSERVER_CONCURRENT_MAP.putIfAbsent(responseObserver, streamObserver);
-          return streamObserver;
-        }
-      }
-    }
-    return STREAM_OBSERVER_STREAM_OBSERVER_CONCURRENT_MAP.get(responseObserver);
-  }
-
   @Override
   public void close() {
-    /*for (StreamObserver<GrpcRequest> streamObserver : STREAM_OBSERVER_STREAM_OBSERVER_CONCURRENT_MAP
-        .values()) {
-      streamObserver.onCompleted();
-    }*/
   }
 
   @Override

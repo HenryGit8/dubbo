@@ -103,6 +103,7 @@ public class GrpcServerChannel extends AbstractChannel {
       hashMap.put("port", getUrl().getPort());
       Builder response = GrpcReply.newBuilder().setData(ByteString.copyFrom(HessianSerializerUtil.serialize(hashMap)));
       grpcReplyStreamObserver.onNext(response.build());
+      grpcReplyStreamObserver.onCompleted();
     } catch (Throwable e) {
       throw new RemotingException(this, "Failed to send message " + message + " to " + getRemoteAddress() + ", cause: " + e.getMessage(), e);
     }
@@ -114,7 +115,6 @@ public class GrpcServerChannel extends AbstractChannel {
 
   @Override
   public void close() {
-    grpcReplyStreamObserver.onCompleted();
   }
 
   @Override
