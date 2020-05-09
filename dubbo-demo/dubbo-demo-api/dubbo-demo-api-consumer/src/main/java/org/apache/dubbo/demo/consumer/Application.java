@@ -16,6 +16,9 @@
  */
 package org.apache.dubbo.demo.consumer;
 
+import java.util.concurrent.LinkedBlockingQueue;
+import java.util.concurrent.ThreadPoolExecutor;
+import java.util.concurrent.TimeUnit;
 import org.apache.dubbo.config.ApplicationConfig;
 import org.apache.dubbo.config.ReferenceConfig;
 import org.apache.dubbo.config.RegistryConfig;
@@ -25,6 +28,12 @@ import org.apache.dubbo.demo.DemoService;
 import org.apache.dubbo.rpc.service.GenericService;
 
 public class Application {
+
+    private static int thredCount = 100;
+
+    private static int re = 0;
+    private static ThreadPoolExecutor executor  = new ThreadPoolExecutor(100, 101, 10l, TimeUnit.SECONDS,
+        new LinkedBlockingQueue<Runnable>(10000));
     public static void main(String[] args) {
         if (isClassic(args)) {
             runWithRefer();
@@ -61,11 +70,28 @@ public class Application {
 
     private static void runWithRefer() {
         ReferenceConfig<DemoService> reference = new ReferenceConfig<>();
-        reference.setApplication(new ApplicationConfig("dubbo-demo-api-consumer"));
-        reference.setRegistry(new RegistryConfig("zookeeper://127.0.0.1:2181"));
+        ApplicationConfig applicationConfig = new ApplicationConfig("dubbo-demo-api-consumer");
+        applicationConfig.setQosPort(22344);
+        reference.setApplication(applicationConfig);
+        reference.setRegistry(new RegistryConfig("zookeeper://106.12.10.34:2181"));
         reference.setInterface(DemoService.class);
-        DemoService service = reference.get();
-        String message = service.sayHello("dubbo");
-        System.out.println(message);
+        long before = System.currentTimeMillis();
+        for(int i=0;i<thredCount;i++){
+            Runnable task = new Runnable() {
+                @Override
+                public void run() {
+                    DemoService service = reference.get();
+                    System.out.println(service.sayHello("dubbo"));
+                    re = re + 1;
+                    if(re == thredCount){
+                        long after = System.currentTimeMillis();
+                        System.out.println("总共花费时间："+(after-before));
+                        executor.shutdown();
+
+                    }
+                }
+            };
+            executor.execute(task);
+        }
     }
 }

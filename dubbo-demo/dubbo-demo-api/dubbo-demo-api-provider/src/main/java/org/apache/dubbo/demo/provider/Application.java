@@ -25,13 +25,26 @@ import org.apache.dubbo.demo.DemoService;
 import java.util.concurrent.CountDownLatch;
 
 public class Application {
-    public static void main(String[] args) throws Exception {
+  public static void main(String[] args) throws Exception {
+    ServiceConfig<DemoServiceImpl> service = new ServiceConfig<>();
+    ApplicationConfig applicationConfig = new ApplicationConfig("dubbo-demo-api-provider");
+    applicationConfig.setQosPort(28990);
+    service.setApplication(applicationConfig);
+    RegistryConfig registryConfig = new RegistryConfig("zookeeper://106.12.10.34:2181");
+    registryConfig.setTimeout(60000);
+    service.setRegistry(registryConfig);
+    service.setInterface(DemoService.class);
+    service.setRef(new DemoServiceImpl());
+    service.export();
+    System.in.read();
+  }
+   /* public static void main(String[] args) throws Exception {
         if (isClassic(args)) {
             startWithExport();
         } else {
             startWithBootstrap();
         }
-    }
+    }*/
 
     private static boolean isClassic(String[] args) {
         return args.length > 0 && "classic".equalsIgnoreCase(args[0]);

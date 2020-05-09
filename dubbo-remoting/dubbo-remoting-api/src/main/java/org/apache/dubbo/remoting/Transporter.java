@@ -28,7 +28,7 @@ import org.apache.dubbo.common.extension.SPI;
  *
  * @see org.apache.dubbo.remoting.Transporters
  */
-@SPI("netty")
+@SPI("grpc")
 public interface Transporter {
 
     /**

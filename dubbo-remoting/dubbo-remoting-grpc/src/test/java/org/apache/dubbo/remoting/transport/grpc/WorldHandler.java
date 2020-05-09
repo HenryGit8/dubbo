@@ -14,28 +14,23 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.apache.dubbo.demo.provider;
+package org.apache.dubbo.remoting.transport.grpc;
 
-import org.apache.dubbo.demo.DemoService;
-import org.apache.dubbo.rpc.RpcContext;
+import org.apache.dubbo.remoting.RemotingException;
+import org.apache.dubbo.remoting.exchange.ExchangeChannel;
+import org.apache.dubbo.remoting.exchange.support.Replier;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+/**
+ * DataHandler
+ */
+public class WorldHandler implements Replier<World> {
 
-import java.util.concurrent.CompletableFuture;
-
-public class DemoServiceImpl implements DemoService {
-    private static final Logger logger = LoggerFactory.getLogger(DemoServiceImpl.class);
-
-    @Override
-    public String sayHello(String name) {
-        logger.info("Hello " + name + ", request from consumer: " + RpcContext.getContext().getRemoteAddress());
-        return "Hello " + name + ", grpc test success, response from provider: " + RpcContext.getContext().getLocalAddress();
+    public Class<World> interest() {
+        return World.class;
     }
 
-    @Override
-    public CompletableFuture<String> sayHelloAsync(String name) {
-        return null;
+    public Object reply(ExchangeChannel channel, World msg) throws RemotingException {
+        return new Hello("hello," + msg.getName());
     }
 
 }
